@@ -1,0 +1,62 @@
+# BI Blueprint
+
+Arquitetura padrão para projetos de BI cliente-side standalone. Extraída de
+~30 ondas de iteração no projeto **radke-bi** (cliente RADKE Soluções).
+
+## Documentos
+
+| Arquivo | Quando ler |
+|---|---|
+| **[BLUEPRINT.md](./BLUEPRINT.md)** | ANTES de começar um BI novo. Define stack, estrutura, 5 camadas de filtro, padrões de chart, deploy, branding. |
+| **[CHECKLIST.md](./CHECKLIST.md)** | ANTES de cada release. 12 categorias de verificação obrigatória (build, smoke test, filtros, mobile, print, dados, etc). |
+| **[ANTI_PATTERNS.md](./ANTI_PATTERNS.md)** | ANTES de codar feature nova. 20 bugs reais e como evitar. |
+
+## Princípios não-negociáveis
+
+1. **Faça o que o cliente pediu, no nível literal.** Sem filtros decorativos, sem KPIs aproximados.
+2. **Toda UI que sugere filtragem TEM que filtrar.** Se não funciona, remove.
+3. **Toda página é reativa a (year, month, statusFilter, drilldown).** Cards, charts, tabelas — tudo.
+4. **Hooks no topo, sempre.** Antes de qualquer early return.
+5. **Smoke test em Node antes de deploy.** Bundle parsing OK ≠ bundle runtime OK.
+6. **Filtros aplicados em 5 camadas distintas** (build-time / segmentos / on-the-fly / locais / drilldown).
+   Ler seção 3 do BLUEPRINT.
+
+## Quick start (clonar pra novo cliente)
+
+```bash
+# 1) Cópia do esqueleto
+cp -r C:/Projects/radke-bi C:/Projects/<cliente>-bi
+cd C:/Projects/<cliente>-bi
+
+# 2) Reset git
+rm -rf .git
+git init
+git remote add origin git@github.com:BGPGO/<cliente>-bi-web.git
+
+# 3) Adapt branding
+# Edita: index.html (title), assets/, components.jsx (Sidebar nome cliente)
+
+# 4) Adapt ETL
+# Edita: build-data.cjs (credenciais), build-radke-extras.cjs (paths Drive)
+
+# 5) Build inicial
+node build-data.cjs && node build-radke-extras.cjs && node build-jsx.cjs
+
+# 6) Smoke test
+node -e "new Function(require('fs').readFileSync('app.bundle.js','utf8'))"
+
+# 7) Provisiona Coolify (via API REST — ver memory reference_coolify_api_token)
+```
+
+## Política
+
+- **Standalone por cliente** — não compartilhar codebase com outros BIs.
+  Cada cliente tem seu próprio repo, seu próprio Coolify app, suas próprias
+  customizações. O BLUEPRINT é o ponto comum.
+- **Iteração = lei.** Cliente reporta bug → reproduz → causa raiz → fix → confirma.
+  Não fazer band-aid sem entender o porquê.
+- **Pre-flight checklist NÃO É OPCIONAL.** Releases sem checklist viram débito.
+
+---
+
+Última atualização: 2026-05-05 (após sessão de 30 ondas no radke-bi)
