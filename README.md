@@ -68,6 +68,6 @@ Tabela no `fin50-supabase` com 1 linha por BI, respondendo **de onde vem / como 
 - **Ler (qualquer app rápido, via PostgREST):**
   `GET <supabase>/rest/v1/bi_fleet?select=*`
 - **`fleet-status.cjs`** — leitor humano (tabela ou `--json`). Deriva tudo do GitHub, não escreve nada. `node fleet-status.cjs`
-- **`fleet-reconcile.cjs`** — reconciliador manual (`--init` cria a tabela, `--run` faz upsert, `--check` confere). Em produção, o mesmo módulo roda no fim do refresh diário do `bi-refresh-worker` (não-fatal).
+- **Reconciliador** (escreve no banco) — vive no repo **privado** `bi-refresh-worker` (`fleet-reconcile.cjs`), roda no fim do refresh diário. NÃO fica neste repo público (writer de banco + credenciais ficam fora do blueprint).
 - **Colunas FATUAIS** (reconciliador mantém): `fonte, substrato, ultima_atualizacao, ultimo_autor, no_worker, url_live`. **Colunas HUMANAS** (time mantém, nunca sobrescritas): `responsavel, status_controle, nota`.
 - Todo BI novo declara o refresh em `bi.config.js > refresh{ substrato }` (`worker|bgpserver|manual|nenhum`).
