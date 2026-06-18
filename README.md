@@ -60,3 +60,14 @@ node -e "new Function(require('fs').readFileSync('app.bundle.js','utf8'))"
 ---
 
 Última atualização: 2026-05-05 (após sessão de 30 ondas no radke-bi)
+
+## Painel de controle da frota — `public.bi_fleet`
+
+Tabela no `fin50-supabase` com 1 linha por BI, respondendo **de onde vem / como atualiza / quando** sem abrir repo. É o painel de CONTROLE (não a fonte de dados): os BIs não empurram; um reconciliador descobre todos os `*-bi-web` e faz upsert.
+
+- **Ler (qualquer app rápido, via PostgREST):**
+  `GET <supabase>/rest/v1/bi_fleet?select=*`
+- **`fleet-status.cjs`** — leitor humano (tabela ou `--json`). Deriva tudo do GitHub, não escreve nada. `node fleet-status.cjs`
+- **`fleet-reconcile.cjs`** — reconciliador manual (`--init` cria a tabela, `--run` faz upsert, `--check` confere). Em produção, o mesmo módulo roda no fim do refresh diário do `bi-refresh-worker` (não-fatal).
+- **Colunas FATUAIS** (reconciliador mantém): `fonte, substrato, ultima_atualizacao, ultimo_autor, no_worker, url_live`. **Colunas HUMANAS** (time mantém, nunca sobrescritas): `responsavel, status_controle, nota`.
+- Todo BI novo declara o refresh em `bi.config.js > refresh{ substrato }` (`worker|bgpserver|manual|nenhum`).
